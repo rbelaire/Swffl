@@ -2,9 +2,14 @@ import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import type {
   CareerStat,
   DraftPick,
+  FuturesResult,
+  LeaderboardRow,
   LeagueRecord,
   Manager,
   Matchup,
+  NflGame,
+  NflSeason,
+  NflTeam,
   PlayerScore,
   RosterPlayer,
   Season,
@@ -105,6 +110,61 @@ export async function getDraftPicks(): Promise<DraftPick[]> {
     .select("*")
     .order("overall", { ascending: true });
   return data ?? [];
+}
+
+// ---- Prediction game reads -------------------------------------------------
+
+export async function getNflTeams(): Promise<NflTeam[]> {
+  const supabase = createClient();
+  if (!supabase) return [];
+  const { data } = await supabase
+    .from("nfl_teams")
+    .select("*")
+    .order("division", { ascending: true })
+    .order("name", { ascending: true });
+  return data ?? [];
+}
+
+export async function getNflSeasons(): Promise<NflSeason[]> {
+  const supabase = createClient();
+  if (!supabase) return [];
+  const { data } = await supabase
+    .from("nfl_season")
+    .select("*")
+    .order("season_year", { ascending: false });
+  return data ?? [];
+}
+
+export async function getCurrentNflSeason(): Promise<NflSeason | null> {
+  const seasons = await getNflSeasons();
+  return seasons.find((s) => s.is_current) ?? seasons[0] ?? null;
+}
+
+export async function getNflGames(seasonYear?: number): Promise<NflGame[]> {
+  const supabase = createClient();
+  if (!supabase) return [];
+  let q = supabase.from("nfl_games").select("*");
+  if (seasonYear != null) q = q.eq("season_year", seasonYear);
+  const { data } = await q
+    .order("week", { ascending: true })
+    .order("kickoff", { ascending: true });
+  return data ?? [];
+}
+
+export async function getFuturesResults(seasonYear?: number): Promise<FuturesResult[]> {
+  const supabase = createClient();
+  if (!supabase) return [];
+  let q = supabase.from("futures_results").select("*");
+  if (seasonYear != null) q = q.eq("season_year", seasonYear);
+  const { data } = await q;
+  return data ?? [];
+}
+
+export async function getLeaderboard(seasonYear: number): Promise<LeaderboardRow[]> {
+  const supabase = createClient();
+  if (!supabase) return [];
+  const { data } = await supabase.rpc("prediction_leaderboard", { p_season: seasonYear });
+  return (data as LeaderboardRow[]) ?? [];
 }
 
 /** Compute all-time career lines for every manager from the season/team data. */

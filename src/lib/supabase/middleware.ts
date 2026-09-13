@@ -4,7 +4,7 @@ import { NextResponse, type NextRequest } from "next/server";
 /**
  * Keeps the auth session fresh on every request and guards the /admin area.
  * Unauthenticated visitors hitting /admin (other than the login page) are
- * redirected to /admin/login.
+ * redirected to /login.
  */
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -43,20 +43,13 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
-  const isAdmin = path.startsWith("/admin");
-  const isLogin = path === "/admin/login";
 
-  if (isAdmin && !isLogin && !user) {
+  // Unauthenticated visitors to the admin area go to the login page.
+  // (Admin-vs-member authorization is enforced in the /admin layout.)
+  if (path.startsWith("/admin") && !user) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/admin/login";
+    redirectUrl.pathname = "/login";
     redirectUrl.searchParams.set("redirect", path);
-    return NextResponse.redirect(redirectUrl);
-  }
-
-  if (isLogin && user) {
-    const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/admin";
-    redirectUrl.search = "";
     return NextResponse.redirect(redirectUrl);
   }
 

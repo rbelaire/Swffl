@@ -18,17 +18,16 @@ const sections = [
   { href: "/admin/rosters", label: "Rosters" },
   { href: "/admin/records", label: "Records" },
   { href: "/admin/content", label: "Site Content" },
+  { href: "/admin/members", label: "Members" },
+  { href: "/admin/nfl-season", label: "NFL Seasons" },
+  { href: "/admin/nfl-games", label: "NFL Games" },
+  { href: "/admin/futures-results", label: "Futures Results" },
 ];
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [signingOut, setSigningOut] = useState(false);
-
-  // The login page renders without the admin chrome.
-  if (pathname === "/admin/login") {
-    return <>{children}</>;
-  }
 
   const active = (href: string, exact?: boolean) =>
     exact ? pathname === href : pathname.startsWith(href);
@@ -37,7 +36,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     setSigningOut(true);
     const supabase = createClient();
     if (supabase) await supabase.auth.signOut();
-    router.push("/admin/login");
+    router.push("/login");
     router.refresh();
   };
 

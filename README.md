@@ -42,6 +42,18 @@ Built with **Next.js 14 (App Router)**, **TypeScript**, **Tailwind CSS**, and
 These light up automatically once you load the data below — until then each page
 shows a friendly empty state.
 
+### NFL Prediction Pool
+
+| Page | What it does |
+| --- | --- |
+| **Predict** | Members-vs-field NFL pick'em with a live leaderboard |
+| **Weekly Picks** | Pick the winner of every NFL game; locks at kickoff |
+| **Futures** | Call all 8 division winners, both conference champs, and the Super Bowl |
+| **Leaderboard** | 1 point per correct pick, ranked |
+
+Members sign in with their own account and can only edit **their own** picks;
+admins keep full control of everything else.
+
 ---
 
 ## Quick start
@@ -60,8 +72,10 @@ npm install
    all tables, security policies, and some sample data.
 
 > **Already ran an older `schema.sql`?** Instead of re-running it (which resets
-> data), run [`supabase/migrations/002_advanced_stats.sql`](supabase/migrations/002_advanced_stats.sql)
-> once to add the matchups / player-scores / draft tables the analytics pages need.
+> data), run the migrations you're missing, in order:
+> [`002_advanced_stats.sql`](supabase/migrations/002_advanced_stats.sql) (analytics
+> tables) and [`003_prediction_game.sql`](supabase/migrations/003_prediction_game.sql)
+> (member accounts + the NFL prediction pool).
 
 ### 3. Add your environment variables
 
@@ -77,14 +91,24 @@ NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-public-key
 ```
 
-### 4. Create your admin account
+### 4. Accounts & roles
 
-Admins are just Supabase Auth users. To keep the league private:
+There are two kinds of account, both Supabase Auth users:
 
-1. **Authentication → Providers → Email** — turn **OFF**
-   "Allow new users to sign up" (so only you can create accounts).
-2. **Authentication → Users → Add user** — create yourself an account with a
-   password. (Add a co-commissioner the same way if you like.)
+- **Members** — anyone who signs up at `/login`. They can submit their own NFL
+  predictions and nothing else.
+- **Admins** — members with `is_admin = true`. They can edit all league data
+  and run the prediction pool.
+
+Setup:
+
+1. **Authentication → Providers → Email** — turn sign-ups **ON** so members can
+   register (they'll appear under **Admin → Members**).
+2. Create your own account at `/login`. When you run migration `003`, all
+   existing auth users are auto-promoted to admin, so the first account(s) you
+   make are admins. After that, promote anyone else from **Admin → Members**.
+3. Prefer email confirmation on for a public site; off is fine for a small
+   private league.
 
 ### 5. Run it
 
@@ -92,8 +116,8 @@ Admins are just Supabase Auth users. To keep the league private:
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Log in at
-[http://localhost:3000/admin](http://localhost:3000/admin).
+Open [http://localhost:3000](http://localhost:3000). Members sign in at
+`/login`; admins manage the site at `/admin`.
 
 ---
 
@@ -144,8 +168,28 @@ year,round,pick,overall,manager,player,position,nfl_team,is_keeper
 2024,1,1,1,rebuilder,Workhorse Back,RB,SF,false
 ```
 
+**NFL schedule** (for the prediction pool — use team abbreviations, leave
+`kickoff`/`winner` blank until known):
+
+```csv
+year,week,kickoff,away,home,winner,is_final
+2025,1,2025-09-07T17:00:00Z,DAL,PHI,,false
+```
+
 The importer previews everything and flags any rows it can't match before you
 commit — nothing is written until you click **Import**.
+
+### Running the prediction pool
+
+1. **Admin → NFL Seasons** — create the season, mark it **current**, and set
+   **Futures lock** (usually kickoff of Week 1) so futures freeze on time.
+2. **Admin → NFL Games** — add the schedule (or bulk-import it). Each game's
+   picks lock automatically at its kickoff time.
+3. As games finish, set each game's **winner** + **Final** (or import them).
+4. **Admin → Futures Results** — set division/conference/Super Bowl winners as
+   they're decided.
+
+The leaderboard scores everything automatically (1 pt per correct pick).
 
 ### Custom lineup rules (optional)
 
@@ -173,7 +217,10 @@ different slots, edit that season in **Admin → Seasons** and set **Roster Slot
 The database uses Postgres **Row Level Security**:
 
 - **Anyone** can *read* league data (that's the public site).
-- **Only signed-in users** (your admins) can *create, edit, or delete*.
+- **Only admins** (`profiles.is_admin = true`) can *create, edit, or delete*
+  league data.
+- **Members** can only read/write **their own** prediction picks — enforced by
+  RLS and by database triggers that also lock picks at kickoff.
 
 The Supabase anon key is safe to expose in the browser — RLS is what protects
 your data. Never commit a `service_role` key; this project doesn't use one.

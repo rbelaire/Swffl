@@ -33,6 +33,8 @@ export type RefConfig = {
   /** Build the option label from a reference row. */
   label: (row: any, refs: Record<string, any[]>) => string;
   orderBy?: { column: string; ascending?: boolean };
+  /** Column used as the stored value (defaults to "id"). */
+  valueField?: string;
 };
 
 type Props = {
@@ -106,7 +108,8 @@ export function AdminTable({
   const refLabel = (refTable: string | undefined, id: any) => {
     if (!refTable || id == null) return "—";
     const conf = references.find((r) => r.table === refTable);
-    const row = refs[refTable]?.find((x) => x.id === id);
+    const vf = conf?.valueField ?? "id";
+    const row = refs[refTable]?.find((x) => x[vf] === id);
     if (!row || !conf) return "—";
     return conf.label(row, refs);
   };
@@ -115,9 +118,10 @@ export function AdminTable({
     if (f.type === "select") return f.options ?? [];
     if (f.type === "ref" && f.refTable) {
       const conf = references.find((r) => r.table === f.refTable);
+      const vf = conf?.valueField ?? "id";
       return (refs[f.refTable] ?? []).map((row) => ({
-        value: row.id,
-        label: conf ? conf.label(row, refs) : row.id,
+        value: row[vf],
+        label: conf ? conf.label(row, refs) : row[vf],
       }));
     }
     return [];

@@ -115,6 +115,75 @@ export type SiteContent = {
   updated_at?: string;
 };
 
+// ---- Prediction game -------------------------------------------------------
+
+export type Profile = {
+  id: string;
+  display_name: string | null;
+  manager_id: string | null;
+  is_admin: boolean;
+  created_at?: string;
+};
+
+export type NflTeam = {
+  abbr: string;
+  name: string;
+  conference: string;
+  division: string;
+};
+
+export type NflSeason = {
+  season_year: number;
+  is_current: boolean;
+  futures_lock_at: string | null;
+  created_at?: string;
+};
+
+export type NflGame = {
+  id: string;
+  season_year: number;
+  week: number;
+  kickoff: string | null;
+  away_abbr: string;
+  home_abbr: string;
+  winner_abbr: string | null;
+  is_final: boolean;
+  created_at?: string;
+};
+
+export type GamePick = {
+  id: string;
+  user_id: string;
+  game_id: string;
+  pick_abbr: string;
+  created_at?: string;
+};
+
+export type FuturesPick = {
+  id: string;
+  user_id: string;
+  season_year: number;
+  category: "division" | "conference" | "super_bowl";
+  slot_key: string;
+  pick_abbr: string;
+  created_at?: string;
+};
+
+export type FuturesResult = {
+  season_year: number;
+  category: string;
+  slot_key: string;
+  winner_abbr: string | null;
+};
+
+export type LeaderboardRow = {
+  user_id: string;
+  display_name: string;
+  weekly_pts: number;
+  futures_pts: number;
+  total_pts: number;
+};
+
 /** A manager's all-time, aggregated career line. */
 export type CareerStat = {
   manager: Manager;

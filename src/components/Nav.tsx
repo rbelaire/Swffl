@@ -10,7 +10,7 @@ const primary = [
   { href: "/standings", label: "Standings" },
   { href: "/stats", label: "Stats" },
   { href: "/rosters", label: "Rosters" },
-  { href: "/history", label: "History" },
+  { href: "/predict", label: "Predict" },
 ];
 
 const analytics = [

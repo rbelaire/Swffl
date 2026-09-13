@@ -88,6 +88,20 @@ export default async function AdminDashboard() {
       </div>
 
       <div className="mt-6 card p-6">
+        <h2 className="font-display text-lg font-700 text-navy-950">Prediction Pool</h2>
+        <p className="mt-1 text-sm text-navy-900/60">
+          Run the members-vs-field NFL pick&apos;em. Set up the season, load the
+          schedule, and enter results as they happen.
+        </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Link href="/admin/nfl-season" className="btn-ghost">NFL Seasons</Link>
+          <Link href="/admin/nfl-games" className="btn-ghost">NFL Games</Link>
+          <Link href="/admin/futures-results" className="btn-ghost">Futures Results</Link>
+          <Link href="/admin/members" className="btn-ghost">Members</Link>
+        </div>
+      </div>
+
+      <div className="mt-6 card p-6">
         <h2 className="font-display text-lg font-700 text-navy-950">
           Recommended order
         </h2>
