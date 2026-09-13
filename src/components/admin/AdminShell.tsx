@@ -8,9 +8,13 @@ import { createClient } from "@/lib/supabase/client";
 
 const sections = [
   { href: "/admin", label: "Dashboard", exact: true },
+  { href: "/admin/import", label: "Bulk Import" },
   { href: "/admin/managers", label: "Managers" },
   { href: "/admin/seasons", label: "Seasons" },
   { href: "/admin/teams", label: "Teams" },
+  { href: "/admin/matchups", label: "Matchups" },
+  { href: "/admin/players", label: "Player Scores" },
+  { href: "/admin/draft", label: "Draft Picks" },
   { href: "/admin/rosters", label: "Rosters" },
   { href: "/admin/records", label: "Records" },
   { href: "/admin/content", label: "Site Content" },

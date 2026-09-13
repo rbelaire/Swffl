@@ -1,8 +1,10 @@
 import Link from "next/link";
 import {
+  getDraftPicks,
   getManagers,
+  getMatchups,
+  getPlayerScores,
   getRecords,
-  getRosterPlayers,
   getSeasons,
   getTeams,
   isSupabaseConfigured,
@@ -13,19 +15,24 @@ export const dynamic = "force-dynamic";
 export default async function AdminDashboard() {
   const configured = isSupabaseConfigured();
 
-  const [managers, seasons, teams, players, records] = await Promise.all([
-    getManagers(),
-    getSeasons(),
-    getTeams(),
-    getRosterPlayers(),
-    getRecords(),
-  ]);
+  const [managers, seasons, teams, matchups, players, draft, records] =
+    await Promise.all([
+      getManagers(),
+      getSeasons(),
+      getTeams(),
+      getMatchups(),
+      getPlayerScores(),
+      getDraftPicks(),
+      getRecords(),
+    ]);
 
   const cards = [
     { href: "/admin/managers", label: "Managers", count: managers.length },
     { href: "/admin/seasons", label: "Seasons", count: seasons.length },
     { href: "/admin/teams", label: "Teams", count: teams.length },
-    { href: "/admin/rosters", label: "Roster Players", count: players.length },
+    { href: "/admin/matchups", label: "Matchups", count: matchups.length },
+    { href: "/admin/players", label: "Player Scores", count: players.length },
+    { href: "/admin/draft", label: "Draft Picks", count: draft.length },
     { href: "/admin/records", label: "Records", count: records.length },
   ];
 
@@ -68,22 +75,37 @@ export default async function AdminDashboard() {
         ))}
       </div>
 
-      <div className="mt-8 card p-6">
+      <div className="mt-8 rounded-xl border border-navy-700 bg-navy p-6 text-white">
+        <h2 className="font-display text-lg font-700">Loading a lot of data?</h2>
+        <p className="mt-1 text-sm text-white/70">
+          The <strong>Bulk Import</strong> tool takes CSV or JSON and matches
+          seasons/teams automatically — the fastest way to load matchups,
+          weekly player scores, and drafts across 14 years.
+        </p>
+        <Link href="/admin/import" className="btn-primary mt-4 bg-white text-navy-950 hover:bg-white/90">
+          Open Bulk Import
+        </Link>
+      </div>
+
+      <div className="mt-6 card p-6">
         <h2 className="font-display text-lg font-700 text-navy-950">
-          Editing tips
+          Recommended order
         </h2>
         <ul className="mt-3 space-y-2 text-sm leading-relaxed text-navy-900/75">
           <li>
-            • Add <strong>Managers</strong> first, then create a{" "}
-            <strong>Season</strong> and its <strong>Teams</strong>.
+            1. <strong>Managers</strong> → 2. <strong>Seasons</strong> → 3.{" "}
+            <strong>Teams</strong> (these must exist before importing games).
           </li>
           <li>
-            • All-time stats on the public site are calculated automatically from
-            season results — no manual totals needed.
+            4. <strong>Matchups</strong> and <strong>Player Scores</strong> (bulk
+            import) unlock optimal lineups, power rankings, playoff odds, luck,
+            head-to-head, records and awards.
           </li>
           <li>
-            • Use <strong>Site Content</strong> to edit the About, Rules and
-            Payouts blurbs shown on the home and history pages.
+            5. <strong>Draft Picks</strong> power the Draft Room and grades.
+          </li>
+          <li>
+            • Career/all-time stats are computed automatically — never entered by hand.
           </li>
         </ul>
       </div>

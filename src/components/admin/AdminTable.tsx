@@ -9,7 +9,8 @@ export type FieldType =
   | "textarea"
   | "boolean"
   | "select"
-  | "ref";
+  | "ref"
+  | "json";
 
 export type FieldDef = {
   key: string;
@@ -147,7 +148,14 @@ export function AdminTable({
         let v = editing[f.key];
         if (f.type === "number") v = v === "" || v == null ? null : Number(v);
         if ((f.type === "ref" || f.type === "select") && v === "") v = null;
-        if (typeof v === "string") v = v.trim() === "" ? null : v;
+        if (f.type === "json") {
+          if (typeof v === "string") {
+            const trimmed = v.trim();
+            v = trimmed === "" ? null : JSON.parse(trimmed); // throws -> caught below
+          }
+        } else if (typeof v === "string") {
+          v = v.trim() === "" ? null : v;
+        }
         payload[f.key] = v;
       }
       if (editing.__new) {
@@ -295,6 +303,12 @@ function CellValue({
       </span>
     );
   if (f.type === "ref") return <>{refLabel(f.refTable, value)}</>;
+  if (f.type === "json")
+    return value ? (
+      <span className="badge-navy">Custom</span>
+    ) : (
+      <span className="text-navy-900/40">Default</span>
+    );
   if (value == null || value === "")
     return <span className="text-navy-900/30">—</span>;
   if (f.type === "textarea") {
@@ -349,12 +363,16 @@ function EditDrawer({
                 {f.required && <span className="text-red-500"> *</span>}
               </label>
 
-              {f.type === "textarea" ? (
+              {f.type === "textarea" || f.type === "json" ? (
                 <textarea
                   id={f.key}
-                  className="field min-h-[120px]"
+                  className={`field min-h-[120px] ${f.type === "json" ? "font-mono text-xs" : ""}`}
                   placeholder={f.placeholder}
-                  value={values[f.key] ?? ""}
+                  value={
+                    typeof values[f.key] === "object" && values[f.key] !== null
+                      ? JSON.stringify(values[f.key], null, 2)
+                      : values[f.key] ?? ""
+                  }
                   onChange={(e) => set(f.key, e.target.value)}
                 />
               ) : f.type === "boolean" ? (

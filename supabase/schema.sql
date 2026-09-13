@@ -17,6 +17,9 @@
 create extension if not exists "pgcrypto";
 
 -- Clean slate ---------------------------------------------------------------
+drop table if exists player_scores  cascade;
+drop table if exists matchups       cascade;
+drop table if exists draft_picks    cascade;
 drop table if exists roster_players cascade;
 drop table if exists records        cascade;
 drop table if exists teams          cascade;
@@ -48,6 +51,9 @@ create table seasons (
   regular_season_id     uuid references managers(id) on delete set null, -- best regular-season record
   last_place_id         uuid references managers(id) on delete set null, -- the "sacko"
   notes                 text,
+  regular_season_weeks  int default 14,
+  playoff_teams         int default 6,
+  roster_slots          jsonb,            -- lineup slots for optimal-lineup math (see migration 002)
   created_at            timestamptz not null default now()
 );
 
@@ -242,3 +248,7 @@ Half a league''s worth of managers have come and gone, but the competition (and 
 • 2nd place: 25%.
 • Regular-season points leader: 15%.
 • Last place: brings the trophy engraving money and picks the following year''s punishment.', 3);
+
+-- ============================================================================
+--  ADVANCED STATS (folded in from migrations/002_advanced_stats.sql)
+-- ============================================================================

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   computeCareerStats,
   getManagers,
@@ -80,9 +81,18 @@ export default async function StatsPage() {
                     <tr key={c.manager.id}>
                       <td className="font-semibold text-navy-500">{i + 1}</td>
                       <td>
-                        <span className="font-semibold text-navy-950">
-                          {c.manager.name}
-                        </span>
+                        {c.manager.slug ? (
+                          <Link
+                            href={`/managers/${c.manager.slug}`}
+                            className="font-semibold text-navy-950 hover:text-navy-600"
+                          >
+                            {c.manager.name}
+                          </Link>
+                        ) : (
+                          <span className="font-semibold text-navy-950">
+                            {c.manager.name}
+                          </span>
+                        )}
                         {!c.manager.active && (
                           <span className="ml-2 badge-navy">Retired</span>
                         )}

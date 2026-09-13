@@ -1,8 +1,11 @@
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import type {
   CareerStat,
+  DraftPick,
   LeagueRecord,
   Manager,
+  Matchup,
+  PlayerScore,
   RosterPlayer,
   Season,
   SiteContent,
@@ -71,6 +74,36 @@ export async function getSiteContent(): Promise<SiteContent[]> {
     .from("site_content")
     .select("*")
     .order("sort_order", { ascending: true });
+  return data ?? [];
+}
+
+export async function getMatchups(): Promise<Matchup[]> {
+  const supabase = createClient();
+  if (!supabase) return [];
+  const { data } = await supabase
+    .from("matchups")
+    .select("*")
+    .order("week", { ascending: true });
+  return data ?? [];
+}
+
+export async function getPlayerScores(): Promise<PlayerScore[]> {
+  const supabase = createClient();
+  if (!supabase) return [];
+  const { data } = await supabase
+    .from("player_scores")
+    .select("*")
+    .order("week", { ascending: true });
+  return data ?? [];
+}
+
+export async function getDraftPicks(): Promise<DraftPick[]> {
+  const supabase = createClient();
+  if (!supabase) return [];
+  const { data } = await supabase
+    .from("draft_picks")
+    .select("*")
+    .order("overall", { ascending: true });
   return data ?? [];
 }
 

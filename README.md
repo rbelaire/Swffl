@@ -22,9 +22,25 @@ Built with **Next.js 14 (App Router)**, **TypeScript**, **Tailwind CSS**, and
 | **Standings** | Final records & finishes, one season at a time |
 | **Stats** | All-time career leaderboard (computed automatically) |
 | **Rosters** | Every team's roster, by season |
-| **Records** | League records grouped by category |
 | **History** | Champions timeline + editable info blocks |
-| **Admin** | Login + full create/edit/delete for everything |
+| **Managers** | Per-manager career profile pages (titles, rivals, season-by-season) |
+| **Admin** | Login + full create/edit/delete + bulk importer |
+
+### Analytics (the fun stuff)
+
+| Page | What it shows |
+| --- | --- |
+| **Optimal Lineups** | Alternate "best-ball" standings + coaching efficiency (points left on the bench) |
+| **Power Rankings** | Auto-computed weekly rankings with movement arrows |
+| **Playoff Odds** | Monte-Carlo simulation of the rest of the season (playoff & title %) |
+| **Luck Index** | All-play record vs. actual record — skill vs. schedule |
+| **Head-to-Head** | All-time grid of every manager vs. every other, plus rivalries |
+| **Draft Room** | Every pick, graded in hindsight against points scored |
+| **Record Book** | Auto-detected records (highest week, blowouts, etc.) + manual records |
+| **Awards** | Per-season superlatives (champion, best manager, MVP, the Sacko) |
+
+These light up automatically once you load the data below — until then each page
+shows a friendly empty state.
 
 ---
 
@@ -42,6 +58,10 @@ npm install
 2. In the dashboard, open **SQL Editor → New query**, paste the contents of
    [`supabase/schema.sql`](supabase/schema.sql), and **Run** it. This creates
    all tables, security policies, and some sample data.
+
+> **Already ran an older `schema.sql`?** Instead of re-running it (which resets
+> data), run [`supabase/migrations/002_advanced_stats.sql`](supabase/migrations/002_advanced_stats.sql)
+> once to add the matchups / player-scores / draft tables the analytics pages need.
 
 ### 3. Add your environment variables
 
@@ -91,6 +111,60 @@ Everything is managed from **/admin**:
 > **All-time stats are automatic.** The Stats page and the "All-Time Leaders"
 > table compute wins, championships, and win % from your season/team data —
 > you never enter totals by hand.
+
+### Loading lots of data (Bulk Import)
+
+Entering 14 years by hand is brutal, so **Admin → Bulk Import** takes CSV (or a
+JSON array) and matches seasons/teams for you by **year** and **manager
+name/slug**. Add Managers, Seasons and Teams first, then paste one of these:
+
+**Matchups** — one row per game (leave scores blank for future games):
+
+```csv
+year,week,home,away,home_score,away_score,is_playoff,round
+2024,1,the-dynasty,draft-legend,132.5,118.9,false,
+2024,15,the-dynasty,commissioner,,,true,Championship
+```
+
+**Player scores** — one row per player per week, **starters and bench** (this
+powers optimal lineups, coaching efficiency, MVPs and draft grades):
+
+```csv
+year,manager,week,player,position,nfl_team,slot,points,is_playoff
+2024,the-dynasty,1,Star Quarterback,QB,DAL,QB,24.3,false
+2024,the-dynasty,1,Benched Stud,RB,GB,BENCH,22.9,false
+```
+
+`slot` is the position for starters (`QB/RB/WR/TE/FLEX/K/DEF`) or `BENCH`/`IR`.
+
+**Draft picks:**
+
+```csv
+year,round,pick,overall,manager,player,position,nfl_team,is_keeper
+2024,1,1,1,rebuilder,Workhorse Back,RB,SF,false
+```
+
+The importer previews everything and flags any rows it can't match before you
+commit — nothing is written until you click **Import**.
+
+### Custom lineup rules (optional)
+
+Optimal-lineup math assumes a standard half-PPR lineup. If a season used
+different slots, edit that season in **Admin → Seasons** and set **Roster Slots**
+(JSON), e.g. a superflex league:
+
+```json
+[
+  {"slot":"QB","eligible":["QB"],"count":1},
+  {"slot":"RB","eligible":["RB"],"count":2},
+  {"slot":"WR","eligible":["WR"],"count":2},
+  {"slot":"TE","eligible":["TE"],"count":1},
+  {"slot":"FLEX","eligible":["RB","WR","TE"],"count":1},
+  {"slot":"SUPERFLEX","eligible":["QB","RB","WR","TE"],"count":1},
+  {"slot":"K","eligible":["K"],"count":1},
+  {"slot":"DEF","eligible":["DEF"],"count":1}
+]
+```
 
 ---
 

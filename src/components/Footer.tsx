@@ -43,8 +43,9 @@ export function Footer() {
           </h4>
           <ul className="mt-4 space-y-2 text-sm text-white/75">
             <li><Link className="hover:text-white" href="/rosters">Rosters</Link></li>
-            <li><Link className="hover:text-white" href="/#about">About</Link></li>
-            <li><Link className="hover:text-white" href="/#rules">Rules</Link></li>
+            <li><Link className="hover:text-white" href="/managers">Managers</Link></li>
+            <li><Link className="hover:text-white" href="/optimal">Optimal Lineups</Link></li>
+            <li><Link className="hover:text-white" href="/playoff-odds">Playoff Odds</Link></li>
             <li><Link className="hover:text-white" href="/admin">Admin</Link></li>
           </ul>
         </div>

@@ -92,6 +92,37 @@ export function SetupNotice() {
   );
 }
 
+/** Row of year tabs linking to `${basePath}?year=YYYY`. */
+export function SeasonTabs({
+  seasons,
+  selectedYear,
+  basePath,
+  extraQuery = "",
+}: {
+  seasons: { id: string; year: number }[];
+  selectedYear?: number;
+  basePath: string;
+  extraQuery?: string;
+}) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {seasons.map((s) => (
+        <Link
+          key={s.id}
+          href={`${basePath}?year=${s.year}${extraQuery}`}
+          className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
+            s.year === selectedYear
+              ? "bg-navy text-white"
+              : "border border-navy-900/15 bg-white text-navy-900 hover:border-navy-900/30"
+          }`}
+        >
+          {s.year}
+        </Link>
+      ))}
+    </div>
+  );
+}
+
 export function SectionHeading({
   eyebrow,
   title,

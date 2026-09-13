@@ -8,6 +8,12 @@ export type Manager = {
   created_at?: string;
 };
 
+export type RosterSlot = {
+  slot: string;
+  eligible: string[];
+  count: number;
+};
+
 export type Season = {
   id: string;
   year: number;
@@ -16,6 +22,50 @@ export type Season = {
   regular_season_id: string | null;
   last_place_id: string | null;
   notes: string | null;
+  regular_season_weeks?: number | null;
+  playoff_teams?: number | null;
+  roster_slots?: RosterSlot[] | null;
+  created_at?: string;
+};
+
+export type Matchup = {
+  id: string;
+  season_id: string;
+  week: number;
+  is_playoff: boolean;
+  round: string | null;
+  home_team_id: string;
+  away_team_id: string;
+  home_score: number | null;
+  away_score: number | null;
+  created_at?: string;
+};
+
+export type PlayerScore = {
+  id: string;
+  season_id: string;
+  team_id: string;
+  week: number;
+  is_playoff: boolean;
+  player_name: string;
+  position: string | null;
+  nfl_team: string | null;
+  lineup_slot: string | null;
+  points: number;
+  created_at?: string;
+};
+
+export type DraftPick = {
+  id: string;
+  season_id: string;
+  round: number | null;
+  pick: number | null;
+  overall: number | null;
+  team_id: string | null;
+  player_name: string;
+  position: string | null;
+  nfl_team: string | null;
+  is_keeper: boolean;
   created_at?: string;
 };
 
